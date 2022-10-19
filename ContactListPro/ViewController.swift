@@ -235,7 +235,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     func tableView(_ tableView: UITableView,
                    sectionForSectionIndexTitle title: String,
                    at index: Int) -> Int {
-        print("select index is= \(index)")
+        print("Selected SECTION is = \(index)")
         return index
 
     }
