@@ -250,9 +250,15 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         
     }
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        if isFilteringContact{
+        if isFilteringContact && filteredObjects.count == 0 {
             let label = UILabel()
-            label.text = "Searching results"
+            label.text = "Sorry No User Found for this name"
+            label.backgroundColor = UIColor.gray
+            return label
+        }
+        else if isFilteringContact{
+            let label = UILabel()
+            label.text = "Serch Result"
             label.backgroundColor = UIColor.gray
             return label
         }
@@ -329,7 +335,10 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
   
         
         print(filteredObjects.count)
-        if filteredObjects.count != 0 {
+        if filteredObjects.count == 0 && searchString.count != 0 {
+            self.isFilteringContact = true
+        }
+        else if filteredObjects.count != 0 {
             self.isFilteringContact = true
         }
         else {
