@@ -6,42 +6,46 @@
 //
 
 import UIKit
+import Contacts
+
 
 class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     @IBOutlet weak var contactListTableView: UITableView!
     var c = 1
     struct ContactList{
-        let name: String
-        let imageName: String
+        var name: String
+        var imageName: String
 
     }
-    var data: [ContactList] = [
-        ContactList(name: "Nasif Chowdhury", imageName: "na1"),
-        ContactList(name: "Fahim Tridip", imageName: "na2"),
-        ContactList(name: "Nasif", imageName: "e3"),
-        ContactList(name: "Nasif Chowdhury", imageName: "e2"),
-        ContactList(name: "Fahim Tridip", imageName: "na1"),
-        ContactList(name: "Chowdhury", imageName: "na2"),
-        ContactList(name: "Nasif", imageName: "e3"),
-        ContactList(name: "Fahim Tridip", imageName: "na2"),
-        ContactList(name: "Nasif Nasif", imageName: "na1"),
-        ContactList(name: "Cxfxxx", imageName: "na2"),
-        ContactList(name: "Fahim Tridip", imageName: "na1"),
-        ContactList(name: "Cgvbsss", imageName: "na2"),
-        ContactList(name: "Nasif", imageName: "na1"),
-        ContactList(name: "Chddeed", imageName: "na2"),
-        ContactList(name: "Nasif", imageName: "na1"),
-        ContactList(name: "Chowdsd", imageName: "na2"),
-        ContactList(name: "Abid", imageName: "na2"),
-        ContactList(name: "Axxx", imageName: "na2"),
-        ContactList(name: "zabb", imageName: "na1"),
-        ContactList(name: "dad", imageName: "na2"),
-        ContactList(name: "jihan", imageName: "na2"),
-        ContactList(name: "Mother", imageName: "na2"),
-        ContactList(name: "Xcs", imageName: "na2"),
-        ContactList(name: "kk", imageName: "na2"),
+    var data =  [ContactList]()
+    //
+//        ContactList(name: "Nasif Chowdhury", imageName: "na1"),
+//        ContactList(name: "Fahim Tridip", imageName: "na2"),
+//        ContactList(name: "Nasif", imageName: "e3"),
+//        ContactList(name: "Nasif Chowdhury", imageName: "e2"),
+//        ContactList(name: "Fahim Tridip", imageName: "na1"),
+//        ContactList(name: "Chowdhury", imageName: "na2"),
+//        ContactList(name: "Nasif", imageName: "e3"),
+//        ContactList(name: "Fahim Tridip", imageName: "na2"),
+//        ContactList(name: "Nasif Nasif", imageName: "na1"),
+//        ContactList(name: "Cxfxxx", imageName: "na2"),
+//        ContactList(name: "Fahim Tridip", imageName: "na1"),
+//        ContactList(name: "Cgvbsss", imageName: "na2"),
+//        ContactList(name: "Nasif", imageName: "na1"),
+//        ContactList(name: "Chddeed", imageName: "na2"),
+//        ContactList(name: "Nasif", imageName: "na1"),
+//        ContactList(name: "Chowdsd", imageName: "na2"),
+//        ContactList(name: "Abid", imageName: "na2"),
+//        ContactList(name: "Axxx", imageName: "na2"),
+//        ContactList(name: "zabb", imageName: "na1"),
+//        ContactList(name: "dad", imageName: "na2"),
+//        ContactList(name: "jihan", imageName: "na2"),
+//        ContactList(name: "Mother", imageName: "na2"),
+//        ContactList(name: "Xcs", imageName: "na2"),
+//        ContactList(name: "kk", imageName: "na2"),
         
-    ]
+   // ]
+    
    
     var filteredObjects = [ContactList]()
    // var filteredObjects = [(letter: Character, data: [ContactList])]()
@@ -57,7 +61,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
   //  var sections = [(letter: Character, names: [String])]()
     var sections = [(letter: Character, data: [ContactList])]()
     var sectionNames: [String] = []
-
+    var searchString = ""
     lazy var searchBar = UISearchBar(frame: .zero)
     private lazy var searchController: UISearchController = {
         let sc = UISearchController(searchResultsController: nil)
@@ -70,13 +74,61 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     }()
     var isFilteringContact = false
    
+    private func fetchContacts(){
+        print("trying to fetching contacts")
+        let store = CNContactStore()
+        store.requestAccess(for: .contacts){ (granted, err) in
+            if let err = err{
+                print("failed to request access", err)
+                return
+            }
+            if granted{
+                
+                let keys = [CNContactGivenNameKey, CNContactFamilyNameKey]
+                
+                let request = CNContactFetchRequest(keysToFetch: keys as [CNKeyDescriptor])
+                do{
+                   
+                    try store.enumerateContacts(with: request, usingBlock: {
+                         (contact, stopPonterIfYouWantToStopEnmurating) in
+                         print(contact.givenName)
+                        print(contact.familyName)
+                      //  ContactList.init(name: contact.familyName, imageName: contact.givenName)
+                        self.data.append(ContactList(name: contact.givenName, imageName: contact.familyName))
+                        
+                         
+                      })
+                     print("access granted")
+                    
+                }
+                catch let err {
+                    print("failed to enmurate contacts", err)
+                    
+                }
+               
+            }
+            else{
+                print("access denied")
+            }
+            
+        }
+        
+        
+        
+        
+    }
+   
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+      //  view.backgroundColor = .red
         navigationItem.title = "Contact"
         navigationController?.navigationBar.prefersLargeTitles = true
         
         searchBar.placeholder = "Search"
         setupNavigationBar()
+        
+        fetchContacts()
 
       //  navigationItem.searchController = searchBar
         
@@ -88,8 +140,8 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
 //                    return name.first!
 //        }
 //        print("THIS is printng ")
+        //        let sectionIndexes = groups.keys.sorted()
 //        print(groups)
-//        let sectionIndexes = groups.keys.sorted()
 //        print(sectionIndexes)
 //        print(groups[sectionIndexes[0]]!)
         
@@ -128,16 +180,16 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
 
                    }
 
-               print(sections)
+            //   print(sections)
 
                print("total sections \(sections.count)")
 
-               print(sections[0].data.count)
+            //   print(sections[0].data.count)
 
-               print(sections[0].data[0])
+            //   print(sections[0].data[0])
         
        
-        let cnt = sections.count
+//              let cnt = sections.count
 //        for i in 0...cnt-1 {
 //            sectionNames.append(String(sections[i].letter))
 //        }
@@ -204,6 +256,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             label.backgroundColor = UIColor.gray
             return label
         }
+        
         else{
             let label = UILabel()
             label.text = "\(sections[section].letter)"
@@ -223,9 +276,12 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             let cnt = sections.count
             print("CNT VALUE IS \(cnt)")
             sectionNames.removeAll()
-            for i in 0...cnt-1 {
-                sectionNames.append(String(sections[i].letter))
+            if cnt > 0{
+                for i in 0...cnt-1 {
+                    sectionNames.append(String(sections[i].letter))
+                }
             }
+            
             return sectionNames
         }
        
@@ -260,7 +316,8 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     func updateSearchResults(for searchController: UISearchController) {
         
         print(searchController.searchBar.text)
-        let searchString = searchController.searchBar.text!
+       searchString = searchController.searchBar.text!
+        print("Search sring count value \(searchString.count)")
           if searchString.isEmpty {
               filteredObjects.removeAll()
           } else {
