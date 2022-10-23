@@ -9,8 +9,12 @@ import UIKit
 import Contacts
 
 
-class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, DataPass {
+    
+    
     @IBOutlet weak var contactListTableView: UITableView!
+    
+    
     var c = 1
     struct ContactList{
         var name: String
@@ -21,7 +25,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     //
 //        ContactList(name: "Nasif Chowdhury", imageName: "na1"),
 //        ContactList(name: "Fahim Tridip", imageName: "na2"),
-//        ContactList(name: "Nasif", imageName: "e3"),
+//        ContactList(name: "Nasif", imagexdxdName: "e3"),
 //        ContactList(name: "Nasif Chowdhury", imageName: "e2"),
 //        ContactList(name: "Fahim Tridip", imageName: "na1"),
 //        ContactList(name: "Chowdhury", imageName: "na2"),
@@ -30,7 +34,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
 //        ContactList(name: "Nasif Nasif", imageName: "na1"),
 //        ContactList(name: "Cxfxxx", imageName: "na2"),
 //        ContactList(name: "Fahim Tridip", imageName: "na1"),
-//        ContactList(name: "Cgvbsss", imageName: "na2"),
+    //        ContactList(name: "Cgvbsss", imageName: "na2"),
 //        ContactList(name: "Nasif", imageName: "na1"),
 //        ContactList(name: "Chddeed", imageName: "na2"),
 //        ContactList(name: "Nasif", imageName: "na1"),
@@ -113,8 +117,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             
         }
         
-        
-        
+       
         
     }
    
@@ -162,25 +165,26 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
 //            .sorted { (left, right) -> Bool in
 //                left.letter < right.letter
 //            }
-        sections = Dictionary(grouping: data) { (name) -> Character in
-
-                   return name.name.first!
-
-                   }
-        
-        .map { (key: Character, value: [ContactList]) -> (letter: Character, names:[ ViewController.ContactList]) in
-
-                       (letter: key, names: value)
-
-                   }
-
-                   .sorted { (left, right) -> Bool in
-
-                       left.letter < right.letter
-
-                   }
+//        sections = Dictionary(grouping: data) { (name) -> Character in
+//
+//                   return name.name.first!
+//
+//                   }
+//
+//        .map { (key: Character, value: [ContactList]) -> (letter: Character, names:[ ViewController.ContactList]) in
+//
+//                       (letter: key, names: value)
+//
+//                   }
+//
+//                   .sorted { (left, right) -> Bool in
+//
+//                       left.letter < right.letter
+//
+//                   }
 
             //   print(sections)
+        self.relaod()
 
                print("total sections \(sections.count)")
 
@@ -199,6 +203,25 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
        
         
         
+    }
+    func relaod(){
+        sections = Dictionary(grouping: data) { (name) -> Character in
+
+                   return name.name.first!
+
+                   }
+        
+        .map { (key: Character, value: [ContactList]) -> (letter: Character, names:[ ViewController.ContactList]) in
+
+                       (letter: key, names: value)
+
+                   }
+
+                   .sorted { (left, right) -> Bool in
+
+                       left.letter < right.letter
+
+                   }
     }
     private func setupNavigationBar() {
           navigationItem.searchController = searchController
@@ -253,12 +276,12 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         if isFilteringContact && filteredObjects.count == 0 {
             let label = UILabel()
             label.text = "Sorry No User Found for this name"
-            label.backgroundColor = UIColor.gray
+            label.backgroundColor = UIColor.red
             return label
         }
         else if isFilteringContact{
             let label = UILabel()
-            label.text = "Serch Result"
+            label.text = "Serch Results"
             label.backgroundColor = UIColor.gray
             return label
         }
@@ -267,6 +290,9 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             let label = UILabel()
             label.text = "\(sections[section].letter)"
             label.backgroundColor = UIColor.gray
+            label.textColor = .white
+           // label.font = .boldSystemFont(ofSize: 16)
+          
             return label
         }
         
@@ -312,8 +338,37 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         }
        // print(data[indexPath.row])
         print("Index value \(indexPath.row)") // it returns the index value
+        print(sections[indexPath.section].data[indexPath.row].name)
+        if let vc = storyboard?.instantiateViewController(identifier: "SeocndViewController") as? SeocndViewController{
+            
+            vc.userName = sections[indexPath.section].data[indexPath.row].name
+            self.navigationController?.pushViewController(vc, animated: true)
+        }
+        
     }
+   
+    @IBAction func btnContactAdd(_ sender: UIBarButtonItem) {
+//        let controller = storyboard?.instantiateViewController(identifier: "ContactAddViewController") as! ContactAddViewController
+        if let vc = storyboard?.instantiateViewController(identifier: "ContactAddViewController") as? ContactAddViewController{
+            vc.modalPresentationStyle = .fullScreen
+            vc.delegate = self
+           // vc.userName = sections[indexPath.section].data[indexPath.row].name
+           // self.navigationController?.pushViewController(vc, animated: true)
+           self.present(vc, animated: true, completion: nil)
+        }
+        
+        
 
+        
+    }
+    func dataPassing(name: String, imageName: String) {
+        print("Back \(name)")
+        self.data.append(ContactList(name: name, imageName: imageName))
+        print(data)
+        relaod()
+        contactListTableView.reloadData()
+    }
+    
 
 }
 
