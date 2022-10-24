@@ -8,7 +8,7 @@
 import UIKit
 
 protocol  DataPass {
-    func dataPassing(name: String, imageName: String )
+    func dataPassing(name: String, imageName: String, number: String )
     
 }
 
@@ -16,13 +16,18 @@ class ContactAddViewController: UIViewController {
     
     @IBOutlet weak var txtField: UITextField!
     
+    @IBOutlet weak var txtNumber: UITextField!
+    
+    @IBOutlet weak var imgUpload: UIImageView!
+    
     var delegate:DataPass!
 
 
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        txtField.placeholder = "Add Contact"
+        txtField.placeholder = "Contact Name"
+        txtNumber.placeholder = "Contact Number"
         
 
     }
@@ -34,13 +39,48 @@ class ContactAddViewController: UIViewController {
 //            self.navigationController?.pushViewController(vc, animated: true)
 //        }
 //        self.dismiss(animated: true, completion: nil)
-        delegate.dataPassing(name: txtField.text!, imageName: "na1")
+        delegate.dataPassing(name: txtField.text!, imageName: "na1", number: txtNumber.text!)
         self.dismiss(animated: true, completion: nil)
         
         
         
     }
     
+    @IBAction func pickPhoto(_ sender: Any){
+        let vc = UIImagePickerController()
+        print("this is pressed1")
+        vc.sourceType = .photoLibrary
+            print("this is pressed2")
+        vc.delegate = self
+        vc.allowsEditing = true
+        present(vc, animated: true)
+        print("this is pressed3")
+        
+    }
+    
+    @IBAction func btnCancle(_ sender: Any){
+        self.dismiss(animated: true, completion: nil)
+    }
+    
 
 
+}
+
+extension ContactAddViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate{
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        print("\(info)")
+        if let image = info[UIImagePickerController.InfoKey(rawValue: "UIImagePickerControllerEditedImage")] as? UIImage{
+            imgUpload.image = image
+            print("IN")
+           
+        }
+       
+        picker.dismiss(animated: true, completion: nil)
+    }
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true, completion: nil)
+    }
+    
+    
 }

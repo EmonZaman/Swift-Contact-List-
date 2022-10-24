@@ -105,7 +105,12 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
                         print(contact.phoneNumbers.first?.value.stringValue ?? "")
                         //  ContactList.init(name: contact.familyName, imageName: contact.givenName)
                         let fullName = contact.givenName + " " + contact.familyName
-                        self.data.append(ContactList(name: fullName, imageName: "na1", phoneNumber: contact.phoneNumbers.first?.value.stringValue ?? ""))
+                        
+                       // let imgData = contact.imageData = UIImage()
+                        print("IMMMmmmmmmmmmm")
+                      
+                        print("endddd")
+                        self.data.append(ContactList(name: fullName, imageName: "na1" , phoneNumber: contact.phoneNumbers.first?.value.stringValue ?? ""))
                         
                         
                     })
@@ -368,15 +373,16 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         if let vc = storyboard?.instantiateViewController(identifier: "ContactAddViewController") as? ContactAddViewController{
             vc.modalPresentationStyle = .fullScreen
             vc.delegate = self
+            
             // vc.userName = sections[indexPath.section].data[indexPath.row].name
             // self.navigationController?.pushViewController(vc, animated: true)
             self.present(vc, animated: true, completion: nil)
         }
         
     }
-    func dataPassing(name: String, imageName: String) {
+    func dataPassing(name: String, imageName: String, number: String ) {
         print("Back \(name)")
-        self.data.append(ContactList(name: name, imageName: imageName, phoneNumber: "123"))
+        self.data.append(ContactList(name: name, imageName: imageName, phoneNumber: number))
         print(data)
         self.relaod()
         contactListTableView.reloadData()
