@@ -8,7 +8,7 @@
 import UIKit
 
 protocol  DataPass {
-    func dataPassing(name: String, imageName: String, number: String )
+    func dataPassing(name: String, imageName: UIImage?, number: String )
     
 }
 
@@ -39,7 +39,7 @@ class ContactAddViewController: UIViewController {
 //            self.navigationController?.pushViewController(vc, animated: true)
 //        }
 //        self.dismiss(animated: true, completion: nil)
-        delegate.dataPassing(name: txtField.text!, imageName: "na1", number: txtNumber.text!)
+        delegate.dataPassing(name: txtField.text!, imageName: imgUpload.image, number: txtNumber.text!)
         self.dismiss(animated: true, completion: nil)
         
         

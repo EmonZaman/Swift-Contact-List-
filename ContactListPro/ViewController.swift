@@ -10,11 +10,8 @@ import Contacts
 
 
 class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, DataPass, DataPassSecondController {
-   
     
-    
-    
-    
+
     
     @IBOutlet weak var contactListTableView: UITableView!
     
@@ -22,7 +19,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     var c = 1
     struct ContactList{
         var name: String
-        var imageName: String
+        var thumbImage: UIImage?
         var phoneNumber: String
         
     }
@@ -93,7 +90,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             }
             if granted{
                 
-                let keys = [CNContactGivenNameKey, CNContactFamilyNameKey, CNContactPhoneNumbersKey]
+                let keys = [CNContactGivenNameKey, CNContactFamilyNameKey, CNContactPhoneNumbersKey, CNContactImageDataKey]
                 
                 let request = CNContactFetchRequest(keysToFetch: keys as [CNKeyDescriptor])
                 do{
@@ -102,15 +99,22 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
                         (contact, stopPonterIfYouWantToStopEnmurating) in
                         print(contact.givenName)
                         print(contact.familyName)
+                    
+                        if let data = contact.imageData {
+                            let image = UIImage(data: data)
+                            print("IMGGGG  ", image?.size)
+                        }
                         print(contact.phoneNumbers.first?.value.stringValue ?? "")
                         //  ContactList.init(name: contact.familyName, imageName: contact.givenName)
                         let fullName = contact.givenName + " " + contact.familyName
                         
                        // let imgData = contact.imageData = UIImage()
                         print("IMMMmmmmmmmmmm")
-                      
+                        let uuid = UUID().uuidString
                         print("endddd")
-                        self.data.append(ContactList(name: fullName, imageName: "na1" , phoneNumber: contact.phoneNumbers.first?.value.stringValue ?? ""))
+                        self.data.append(ContactList(name: fullName, //thumbImage: UIImage(named: "na1") ,
+                                                     thumbImage: nil ?? UIImage(named: "na1") ,
+                                                     phoneNumber: contact.phoneNumbers.first?.value.stringValue ?? ""))
                         
                         
                     })
@@ -256,15 +260,15 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         if(isFilteringContact == false)
         {
             let name = sections[indexPath.section].data[indexPath.row].name
-            let Imagename = sections[indexPath.section].data[indexPath.row].imageName
+            let Imagename = sections[indexPath.section].data[indexPath.row].thumbImage
             cell.label.text = name
-            cell.imgImage.image = UIImage(named: Imagename)
+            cell.imgImage.image = Imagename
             //inroder to show the image first i have to make a image outlet
             //  cell.iconImageView.image = UIImage(named: sections[indexPath.section].data[indexPath.row].imageName)
         }
         else{
             cell.label.text = ("\(filteredObjects[indexPath.row].name)")
-            cell.imgImage.image = UIImage(named: filteredObjects[indexPath.row].imageName)
+            cell.imgImage.image =  filteredObjects[indexPath.row].thumbImage
             
         }
         
@@ -354,10 +358,12 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             
         
             vc.userName = sections[indexPath.section].data[indexPath.row].name
+            vc.oldName = sections[indexPath.section].data[indexPath.row].name
+            vc.oldNumber = sections[indexPath.section].data[indexPath.row].phoneNumber
             //vc.imgUser.image = UIImage(named: sections[indexPath.section].data[indexPath.row].imageName )
-            var image = sections[indexPath.section].data[indexPath.row].imageName
-            print( sections[indexPath.section].data[indexPath.row].imageName)
-            vc.img = image
+            var image = sections[indexPath.section].data[indexPath.row].thumbImage!
+            print( sections[indexPath.section].data[indexPath.row].thumbImage)
+            vc.displayImage = image
             vc.number = sections[indexPath.section].data[indexPath.row].phoneNumber
            // vc.delegate = self
 //            sections[indexPath.section].data[indexPath.row].name = vc.userName
@@ -380,17 +386,28 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         }
         
     }
-    func dataPassing(name: String, imageName: String, number: String ) {
+    func dataPassing(name: String, imageName: UIImage?, number: String) {
         print("Back \(name)")
-        self.data.append(ContactList(name: name, imageName: imageName, phoneNumber: number))
+        self.data.append(ContactList(name: name, thumbImage: imageName, phoneNumber: number))
         print(data)
         self.relaod()
         contactListTableView.reloadData()
     }
-    func dataPassingSecond(name: String, imageName: String, phoneNumber: String, indexPathSection: Int, indexPathRaw: Int) {
-        self.data[indexPathRaw].name = name
-        self.data[indexPathRaw].phoneNumber = phoneNumber
+    func dataPassingSecond(name: String, imageName: UIImage?, phoneNumber: String, indexPathSection: Int, indexPathRaw: Int, oldName: String, oldNumber: String) {
         
+        for index in 0..<data.count{
+            if data[index].name == oldName && data[index].phoneNumber == oldNumber{
+                self.data[index].name = name
+                self.data[index].phoneNumber = phoneNumber
+                self.data[index].thumbImage = imageName
+                break
+            }
+        }
+        
+        
+        
+        print("OLD NAME")
+        print(oldName)
         
         print("here it comes")
         print(name)
