@@ -26,6 +26,13 @@ class ContactAddViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.imgUpload.layer.cornerRadius = 20
+
+        self.imgUpload.clipsToBounds = true
+
+        self.imgUpload.layer.borderColor = UIColor.white.cgColor
+        self.imgUpload.layer.borderWidth = 2
+        
         txtField.placeholder = "Contact Name"
         txtNumber.placeholder = "Contact Number"
         

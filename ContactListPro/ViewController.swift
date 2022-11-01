@@ -81,6 +81,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     var isFilteringContact = false
     
     private func fetchContacts(){
+        
         print("trying to fetching contacts")
         let store = CNContactStore()
         store.requestAccess(for: .contacts){ (granted, err) in
@@ -99,11 +100,13 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
                         (contact, stopPonterIfYouWantToStopEnmurating) in
                         print(contact.givenName)
                         print(contact.familyName)
-                    
+                        var image: UIImage?
                         if let data = contact.imageData {
-                            let image = UIImage(data: data)
+                            image = UIImage(data: data)
                             print("IMGGGG  ", image?.size)
                         }
+                        
+                  
                         print(contact.phoneNumbers.first?.value.stringValue ?? "")
                         //  ContactList.init(name: contact.familyName, imageName: contact.givenName)
                         let fullName = contact.givenName + " " + contact.familyName
@@ -111,10 +114,25 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
                        // let imgData = contact.imageData = UIImage()
                         print("IMMMmmmmmmmmmm")
                         let uuid = UUID().uuidString
+                        print("UUIDDDDDDDDDDDDDDD")
+                        print(uuid)
                         print("endddd")
-                        self.data.append(ContactList(name: fullName, //thumbImage: UIImage(named: "na1") ,
-                                                     thumbImage: nil ?? UIImage(named: "na1") ,
-                                                     phoneNumber: contact.phoneNumbers.first?.value.stringValue ?? ""))
+//                        self.data.append(ContactList(name: fullName, //thumbImage: UIImage(named: "na1") ,
+//                                                     thumbImage: image ?? UIImage(named: "na1") ,
+//                                                     phoneNumber: contact.phoneNumbers.first?.value.stringValue ?? ""))
+                        print("Image Data")
+                    
+                        let contactInfo = ContactsData(context: PersistentStorage.shared.context)
+
+                        contactInfo.name = fullName
+                        contactInfo.mobile = contact.phoneNumbers.first?.value.stringValue ?? ""
+                        contactInfo.id = UUID()
+                        if image != nil{
+                            contactInfo.profilePic = self.saveImageToDocumentDirectory(image: image, id: contactInfo.id)
+                        }
+                      
+                        
+                        PersistentStorage.shared.saveContext()
                         
                         
                     })
@@ -136,9 +154,50 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         
         
     }
+   private func DataConvert(){
+    do {
+        guard let result =   try PersistentStorage.shared.context.fetch(ContactsData.fetchRequest()) as? [ContactsData] else {return}
+        print("fetching data")
+        
+        var image: UIImage?
+        
+       
+        
+        
+        result.forEach { ContactsData in
+            
+            print("Contact Data data dara raaaaaaaaaaaa")
+            if ContactsData.profilePic != nil {
+                image = loadImageFromDocumentDirectory(nameOfImage: ContactsData.profilePic ?? " ")
+                self.data.append(ContactList(name: ContactsData.name ?? "no name", thumbImage: image, phoneNumber: ContactsData.mobile ?? "00"))
+            }
+            else{
+                self.data.append(ContactList(name: ContactsData.name ?? "no name", thumbImage: UIImage(named: "e3"), phoneNumber: ContactsData.mobile ?? "00"))
+                
+            }
+          
+//            if let img = ContactsData.profilePic {
+//                image = UIImage(named: img)
+//                print("IMGGGG  ", image?.size)
+//            }
+            
+            
+        }
+        
+        
+        
+      
+    } catch let error {
+        debugPrint(error)
+    }
+        
+    }
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        
         
         //  view.backgroundColor = .red
         navigationItem.title = "Contact"
@@ -148,6 +207,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         setupNavigationBar()
         
         fetchContacts()
+        DataConvert()
         
         //  navigationItem.searchController = searchBar
         
@@ -213,9 +273,69 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         //        for i in 0...cnt-1 {
         //            sectionNames.append(String(sections[i].letter))
         //        }
-        
+//        createcontact()
+//        fetchContactCoreData()
     
     }
+    
+    //data documentary
+    func saveImageToDocumentDirectory(image: UIImage?, id: UUID? ) -> String? {
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let fileName = "\(id).jpeg"// name of the image to be saved
+        let fileURL = documentsDirectory.appendingPathComponent(fileName)
+        if let data = image?.jpegData(compressionQuality: 1.0),!FileManager.default.fileExists(atPath: fileURL.path){
+            do {
+                try data.write(to: fileURL)
+                print("file saved")
+                return fileName
+            } catch {
+                print("error saving file:", error)
+            }
+        }
+        return nil
+    }
+    func loadImageFromDocumentDirectory(nameOfImage : String) -> UIImage {
+        let nsDocumentDirectory = FileManager.SearchPathDirectory.documentDirectory
+        let nsUserDomainMask = FileManager.SearchPathDomainMask.userDomainMask
+        let paths = NSSearchPathForDirectoriesInDomains(nsDocumentDirectory, nsUserDomainMask, true)
+        print(paths.first)
+        if let dirPath = paths.first{
+            let imageURL = URL(fileURLWithPath: dirPath).appendingPathComponent(nameOfImage)
+            let image    = UIImage(contentsOfFile: imageURL.path)
+            return image!
+        }
+        return UIImage.init(named: "na1")!
+    }
+
+    //coreDataTesting
+    func createcontact(){
+            
+        let contact = ContactsData(context: PersistentStorage.shared.context)
+            
+        contact.name = "Zaman11111122222222222222222222222222222222"
+        contact.mobile = "011121"
+        contact.id = UUID()
+        PersistentStorage.shared.saveContext()
+      
+            
+        }
+        
+    func fetchContactCoreData(){
+    
+            do {
+                guard let result =   try PersistentStorage.shared.context.fetch(ContactsData.fetchRequest()) as? [ContactsData] else {return}
+                print("fetching data")
+                print(result.forEach({debugPrint($0.name)}))
+                print(result.forEach({debugPrint($0.mobile)}))
+                print("IDDD")
+                print(result.forEach({debugPrint($0.id)}))
+                
+              
+            } catch let error {
+                debugPrint(error)
+            }
+    }
+
     func relaod(){
         sections = Dictionary(grouping: data) { (name) -> Character in
             
@@ -361,7 +481,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             vc.oldName = sections[indexPath.section].data[indexPath.row].name
             vc.oldNumber = sections[indexPath.section].data[indexPath.row].phoneNumber
             //vc.imgUser.image = UIImage(named: sections[indexPath.section].data[indexPath.row].imageName )
-            var image = sections[indexPath.section].data[indexPath.row].thumbImage!
+            var image = sections[indexPath.section].data[indexPath.row].thumbImage
             print( sections[indexPath.section].data[indexPath.row].thumbImage)
             vc.displayImage = image
             vc.number = sections[indexPath.section].data[indexPath.row].phoneNumber
@@ -387,10 +507,22 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         
     }
     func dataPassing(name: String, imageName: UIImage?, number: String) {
+        let contactInfo = ContactsData(context: PersistentStorage.shared.context)
+        let uuid = UUID().uuidString
+        contactInfo.name = name
+        contactInfo.mobile = number ?? ""
+        contactInfo.id = UUID()
+        if imageName != nil{
+            contactInfo.profilePic = self.saveImageToDocumentDirectory(image: imageName, id: contactInfo.id)
+        }
+        
+        PersistentStorage.shared.saveContext()
+//        self.data.append(ContactList(name: name ?? "no name", thumbImage: imageName, number: number ?? "00"))
         print("Back \(name)")
         self.data.append(ContactList(name: name, thumbImage: imageName, phoneNumber: number))
         print(data)
         self.relaod()
+        
         contactListTableView.reloadData()
     }
     func dataPassingSecond(name: String, imageName: UIImage?, phoneNumber: String, indexPathSection: Int, indexPathRaw: Int, oldName: String, oldNumber: String) {
