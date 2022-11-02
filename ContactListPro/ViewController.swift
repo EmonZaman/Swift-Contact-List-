@@ -7,7 +7,7 @@
 
 import UIKit
 import Contacts
-
+import CoreData
 
 class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, DataPass, DataPassSecondController {
     
@@ -21,6 +21,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         var name: String
         var thumbImage: UIImage?
         var phoneNumber: String
+        var id: UUID?
         
     }
     var data =  [ContactList]()
@@ -169,10 +170,10 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             print("Contact Data data dara raaaaaaaaaaaa")
             if ContactsData.profilePic != nil {
                 image = loadImageFromDocumentDirectory(nameOfImage: ContactsData.profilePic ?? " ")
-                self.data.append(ContactList(name: ContactsData.name ?? "no name", thumbImage: image, phoneNumber: ContactsData.mobile ?? "00"))
+                self.data.append(ContactList(name: ContactsData.name ?? "no name", thumbImage: image, phoneNumber: ContactsData.mobile ?? "00", id: ContactsData.id))
             }
             else{
-                self.data.append(ContactList(name: ContactsData.name ?? "no name", thumbImage: UIImage(named: "e3"), phoneNumber: ContactsData.mobile ?? "00"))
+                self.data.append(ContactList(name: ContactsData.name ?? "no name", thumbImage: UIImage(named: "e3"), phoneNumber: ContactsData.mobile ?? "00", id: ContactsData.id))
                 
             }
           
@@ -476,6 +477,9 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             vc.indexPathSection = indexPath.section
             vc.indexPathRaw = indexPath.row
             
+            
+            vc.contactid = sections[indexPath.section].data[indexPath.row].id!
+            
         
             vc.userName = sections[indexPath.section].data[indexPath.row].name
             vc.oldName = sections[indexPath.section].data[indexPath.row].name
@@ -519,13 +523,13 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         PersistentStorage.shared.saveContext()
 //        self.data.append(ContactList(name: name ?? "no name", thumbImage: imageName, number: number ?? "00"))
         print("Back \(name)")
-        self.data.append(ContactList(name: name, thumbImage: imageName, phoneNumber: number))
+        self.data.append(ContactList(name: name, thumbImage: imageName, phoneNumber: number, id: contactInfo.id))
         print(data)
         self.relaod()
         
         contactListTableView.reloadData()
     }
-    func dataPassingSecond(name: String, imageName: UIImage?, phoneNumber: String, indexPathSection: Int, indexPathRaw: Int, oldName: String, oldNumber: String) {
+    func dataPassingSecond(name: String, imageName: UIImage?, phoneNumber: String, indexPathSection: Int, indexPathRaw: Int, oldName: String, oldNumber: String, id: UUID) {
         
         for index in 0..<data.count{
             if data[index].name == oldName && data[index].phoneNumber == oldNumber{
@@ -535,7 +539,19 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
                 break
             }
         }
+        print("IDDD")
+        print(id)
+        let contact = getContactForUpdateAndDelete(byIdentifier: id)
+        contact?.name = name
+        contact?.mobile = phoneNumber
         
+        contact?.profilePic = self.saveImageToDocumentDirectory(image: imageName, id: contact?.id)
+        
+        
+        
+        
+        PersistentStorage.shared
+                    .saveContext()
         
         
         print("OLD NAME")
@@ -547,6 +563,26 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         self.relaod()
         contactListTableView.reloadData()
         
+        
+    }
+    func getContactForUpdateAndDelete(byIdentifier id: UUID) -> ContactsData? {
+        
+        let fetchRequest = NSFetchRequest<ContactsData>(entityName: "ContactsData")
+        let predicate = NSPredicate(format: "id==%@", id as CVarArg)
+        fetchRequest.predicate = predicate
+        do {
+            let result = try PersistentStorage.shared.context.fetch(fetchRequest).first
+            
+            guard result != nil else {return nil}
+            
+            return result
+            
+        } catch let error {
+            debugPrint(error)
+        }
+        
+        return nil
+    
         
     }
    

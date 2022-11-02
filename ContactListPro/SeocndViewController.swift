@@ -7,7 +7,7 @@
 
 import UIKit
 protocol  DataPassSecondController {
-    func dataPassingSecond(name: String, imageName: UIImage?, phoneNumber: String, indexPathSection: Int, indexPathRaw: Int, oldName: String, oldNumber: String)
+    func dataPassingSecond(name: String, imageName: UIImage?, phoneNumber: String, indexPathSection: Int, indexPathRaw: Int, oldName: String, oldNumber: String, id: UUID)
 
 }
 
@@ -25,6 +25,7 @@ class SeocndViewController: UIViewController {
     var displayImage: UIImage?
     var oldName = " "
     var oldNumber = " "
+    var contactid = UUID()
     
    var delegate2:DataPassSecondController!
     override func viewDidLoad() {
@@ -44,7 +45,7 @@ class SeocndViewController: UIViewController {
     }
     
     @IBAction func btnUpdate(_ sender: Any){
-        delegate2.dataPassingSecond(name: txtName.text!, imageName: imgUser.image, phoneNumber: txtPhoneNumber.text!, indexPathSection: indexPathSection, indexPathRaw: indexPathRaw, oldName: oldName, oldNumber: oldNumber )
+        delegate2.dataPassingSecond(name: txtName.text!, imageName: imgUser.image, phoneNumber: txtPhoneNumber.text!, indexPathSection: indexPathSection, indexPathRaw: indexPathRaw, oldName: oldName, oldNumber: oldNumber, id: contactid)
         self.navigationController?.popViewController(animated: true)
     }
     @IBAction func photUpdate(_ sender: Any){
